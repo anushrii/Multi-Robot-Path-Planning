@@ -1,0 +1,24 @@
+# first time
+git clone 
+git branch <urename> 
+git checkout <urename>
+
+# when you want to update master
+git add .
+git rm $(git ls-files --deleted)
+git commit -m "<enter message here>"
+git checkout master
+git pull origin master
+git checkout <urename>
+git merge master 
+
+# now if there are merge conflicts fix them and do the following
+git add .
+git rm $(git ls-files --deleted)
+git commit -m "<enter message here>"
+# now its a good idea to bring master to this state - we can discuss this
+git checkout master
+git merge <urename>
+git pull origin master
+git push origin master 
+

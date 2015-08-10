@@ -1,0 +1,84 @@
+%% Clear the previous
+clear all
+close all
+
+%% Parameters
+
+% num robots and goals
+var.nbots = 4;
+var.ngoals = 9;
+
+% num dimensions
+var.n = 2;
+
+% radius
+var.R = 0.3;
+
+% boundary x axis and y axis
+var.bound = 100;
+
+% max vel
+var.vmax = 30;
+
+% st time
+var.t0 = 0;
+
+%% Assign the goals
+
+[start,goal] = generateStart_Goal(var);
+
+% compute the assignment, the time parameterization and
+% the coffiecients to compute the state at every instant
+var = init(start,goal,var);
+t_step = 0.01;
+t_disc = [var.t0:t_step:var.t0+var.tf,tf];
+
+% the radius of the robot
+scale = 20;
+currentgoals = goal;
+currentstate = start;
+
+%% If there are more goals than goals, run the algorithm iteratively
+% first assigning all the robots to some goals. Remove those goals and
+% run again.
+
+while size(currentgoals,1)>var.nbots
+    var = init(currentstate,currentgoals,var);
+    
+    % run simulation
+    for i = 1:numel(t_disc)
+        
+        t = t_disc(i);
+        state = computeCAPT(var,t);
+        
+        % Plot the current state
+        plotSim(state, var);
+        pause(0.0001)
+    end
+    visitedgoals = sum(var.phi);
+    currentgoals = currentgoals((~visitedgoals),:);
+    var.t0 = 0;
+    currentstate = state;
+    
+end
+
+%%
+var = init(currentstate,currentgoals,var);
+for t=0:t_step:var.tf
+    state = computeCAPT(var,t);
+    
+    % Plot the current state
+    h = plot(state(:,1),state(:,2),'bo',...
+        state(:,1),state(:,2),'ro');
+    set(h,{'markers'},{20;2*1.414*var.R*scale/2});
+    set(h,{'markerfacecolor'},{'y';'r'});
+    daspect([1 1 1]);
+    set(gcf,'units','inches')
+    hold on
+    axis([0 var.bound 0 var.bound])
+    grid on
+    plot(start(:,1),start(:,2),'go','MarkerSize',20)
+    plot(goal(:,1),goal(:,2),'ko','MarkerSize',20)
+    hold off
+    pause(0.0001)
+end
